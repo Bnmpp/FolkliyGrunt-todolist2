@@ -1,0 +1,39 @@
+C4Component
+    title Component diagram for Web API
+
+    %% Context Containers (Outside Web API)
+    Container(webapp, "Web App", "React", "Browser-based SPA")
+    Container(mobileapp, "Mobile App", "Flutter", "Mobile Application")
+    ContainerDb(database, "Database", "PostgreSQL", "Data Storage")
+    Container(connector, "MyCourses Connector", "Python Service", "Handles external MyCourses communication")
+
+    %% Web API Container Boundary
+    Container_Boundary(api, "Web API") {
+        Component(auth, "Auth & Authorization", "Component", "Handles login, token validation, and access control.")
+        Component(task_mgr, "Task Management", "Component", "Handles CRUD operations for manual and imported tasks.")
+        Component(sync_orch, "Sync Orchestrator", "Component", "Manages sync workflow, updates tasks, and handles errors.")
+        Component(sync_hist, "Sync History", "Component", "Records sync outcomes for admin monitoring.")
+        Component(data_access, "Data Access", "ORM/Repository", "Abstracts DB access and ensures controlled transactions.")
+        Component(mapping, "Mapping Component", "Utility", "Converts external data models to internal task models.")
+    }
+
+    %% Relationships - Inbound
+    Rel(webapp, auth, "Authenticates", "JSON/HTTPS")
+    Rel(mobileapp, auth, "Authenticates", "JSON/HTTPS")
+    Rel(webapp, task_mgr, "Manages tasks via", "JSON/HTTPS")
+    Rel(mobileapp, task_mgr, "Manages tasks via", "JSON/HTTPS")
+    Rel(webapp, sync_orch, "Triggers sync via", "JSON/HTTPS")
+
+    %% Relationships - Internal Components
+    Rel(auth, data_access, "Verifies user data")
+    Rel(task_mgr, data_access, "Persists task changes")
+    
+    %% Sync Workflow
+    Rel(sync_orch, connector, "Requests fresh data", "Internal Call")
+    Rel(sync_orch, mapping, "Uses to map data")
+    Rel(sync_orch, task_mgr, "Updates/Creates tasks")
+    Rel(sync_orch, sync_hist, "Logs results")
+    Rel(sync_hist, data_access, "Persists logs")
+
+    %% Outbound
+    Rel(data_access, database, "Reads/Writes", "SQL")

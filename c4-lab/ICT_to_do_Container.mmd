@@ -1,0 +1,31 @@
+C4Container
+title Container diagram for ICT To Do List
+
+Person(student, "Student", "Manages personal tasks; may start MyCourses sync")
+Person(instructor, "Instructor", "Views teaching-related tasks and course deadlines")
+Person(admin, "System Administrator", "Manages system configuration and monitors sync health")
+
+System_Boundary(ict, "ICT To Do List") {
+  Container(webapp, "Web App", "React", "Browser-based single page application")
+  Container(mobile, "Mobile App", "Flutter", "Cross-platform mobile application")
+  Container(api, "Web API", "Python FastAPI", "Backend service exposing REST endpoints that accept and return JSON over HTTPS")
+  ContainerDb(db, "Database", "PostgreSQL", "Stores user profiles, tasks, sync settings, and sync history")
+  Container(connector, "MyCourses Connector", "Integration module", "Calls MyCourses web services, parses JSON responses, and maps external data into internal task records")
+}
+
+System_Ext(mycourses, "MyCourses", "External ICT e-learning system that owns course, assignment, and submission data")
+
+Rel(student, webapp, "Uses")
+Rel(instructor, webapp, "Uses (instructor admin/monitoring screens)")
+Rel(admin, webapp, "Uses admin interface")
+
+Rel(student, mobile, "Uses")
+Rel(instructor, mobile, "Uses (if applicable)")
+Rel(admin, mobile, "Uses (if applicable)")
+
+Rel(webapp, api, "Sends client requests (HTTPS / JSON)")
+Rel(mobile, api, "Sends client requests (HTTPS / JSON)")
+
+Rel(api, db, "Reads and writes data in PostgreSQL using SQL through an ORM such as SQLAlchemy")
+Rel(api, connector, "Calls MyCourses Connector over an internal interface (direct function call or internal HTTP)")
+Rel(connector, mycourses, "Calls MyCourses web services (HTTPS / JSON)")
